@@ -5,91 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR Code Scanner</title>
   <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
-    #reader { width: 100%; height: auto; margin: auto; }
-    .code-item { padding: 5px; border-bottom: 1px solid #ddd; }
-    #start-scan { display: block; margin: 20px auto; }
-    #scanned-list { margin-top: 20px; }
+    #reader { width: 100%; height: 400px; margin: auto; }
   </style>
 </head>
 <body>
   <h2>Scan QR Code</h2>
-  <div id="reader" style="width: 100%; height: 400px;"></div>
-  <button id="start-scan" onclick="initScanner()">Start Scanning</button>
-  <button id="stop-scan" onclick="stopScanner()" disabled>Stop Scanning</button>
-  <div id="scanned-list"></div>
-  <div id="qrcode"></div>
+  <!-- The empty div where the QR scanner will render -->
+  <div id="reader" style="width: 500px;"></div>
 
   <script>
-    let html5QrCode;
-    const scannedBarcodes = new Set();
+    // Callback function to handle the scan result
+    function onScanSuccess(decodedText, decodedResult) {
+      // You can handle the scanned result here (e.g., display it, store it, etc.)
+      console.log(`Scan result: ${decodedText}`, decodedResult);
+      alert(`Scanned QR Code: ${decodedText}`);
+    }
 
     // Initialize the scanner
-    window.onload = function() {
-      html5QrCode = new Html5Qrcode("reader");
-      document.getElementById("start-scan").disabled = false;
-    };
-
-    // Handle successful scan
-    function onScanSuccess(decodedText) {
-      // Avoid re-scanning the same code
-      if (!scannedBarcodes.has(decodedText)) {
-        scannedBarcodes.add(decodedText);
-        const item = document.createElement("div");
-        item.className = "code-item";
-        item.textContent = decodedText;
-        document.getElementById("scanned-list").appendChild(item);
-      }
-    }
-
-    // Initialize the QR scanner and request permissions
-    async function initScanner() {
-      if (!html5QrCode) {
-        alert("QR Code scanner is not initialized.");
-        return;
-      }
-
-      try {
-        // Get camera devices and start the scanner
-        const devices = await Html5Qrcode.getCameras();
-        if (devices && devices.length) {
-          // Disable the start button and enable the stop button
-          document.getElementById("start-scan").disabled = true;
-          document.getElementById("stop-scan").disabled = false;
-
-          // Start QR code scanning
-          await html5QrCode.start(devices[0].id, { fps: 10, qrbox: 250 }, onScanSuccess);
-        } else {
-          alert("No cameras found.");
-        }
-      } catch (err) {
-        console.error("Camera access failed:", err);
-        alert("Camera access failed: " + err.message);
-      }
-    }
-
-    // Stop the scanner
-    function stopScanner() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          document.getElementById("start-scan").disabled = false;
-          document.getElementById("stop-scan").disabled = true;
-          console.log("Scanner stopped.");
-        });
-      }
-    }
-
-    // Generate QR code from scanned data
-    function generateQR() {
-      const combined = Array.from(scannedBarcodes).join("\r");
-      document.getElementById("qrcode").innerHTML = "";
-      new QRCode(document.getElementById("qrcode"), {
-        text: combined,
-        width: 256,
-        height: 256,
-      });
-    }
+    var html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    
+    // Render the scanner
+    html5QrcodeScanner.render(onScanSuccess);
   </script>
 </body>
 </html>
