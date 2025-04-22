@@ -5,13 +5,12 @@
     <script>
       function sendPost() {
         const url = "https://prod-164.westeurope.logic.azure.com:443/workflows/728b87f2d7ae41da8e02085bbf038d94/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ddDpxrFxma18q0672cgT6IEWu9FIaioYyMAZQVH2564&qr=HelloWorld";
+        
+        // Build the custom scheme URL
+        const bluetoothUrl = "my.bluetoothprint.scheme://" + url;
 
-        // Do the POST request
-        fetch("my.bluetoothprint.scheme://" + url, {
-          method: "POST"
-        }).then(response => response.text())
-          .then(data => console.log(data))
-          .catch(error => console.error('Error:', error));
+        // Open the custom scheme URL (this will trigger the Bluetooth Print app)
+        window.location.href = bluetoothUrl;
       }
     </script>
   </head>
