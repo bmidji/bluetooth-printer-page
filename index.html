@@ -9,8 +9,10 @@
         // Build the custom scheme URL
         const bluetoothUrl = "my.bluetoothprint.scheme://" + url;
 
-        // Open the custom scheme URL (this will trigger the Bluetooth Print app)
-        window.location.href = bluetoothUrl;
+        // Add a slight delay before redirecting
+        setTimeout(() => {
+          window.location.href = bluetoothUrl;
+        }, 500); // 500ms delay
       }
     </script>
   </head>
