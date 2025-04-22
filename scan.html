@@ -2,30 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Html5QrcodeScanner Example</title>
+  <title>QR Scanner with List</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    #scanned-results {
+      margin-top: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .code-item {
+      padding: 6px;
+      border-bottom: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
   <h1>Scan QR Code</h1>
   <div style="width: 500px" id="reader"></div>
 
+  <div id="scanned-results">
+    <h2>Scanned Codes:</h2>
+    <div id="results-list"></div>
+  </div>
+
   <script>
+    const resultsList = document.getElementById("results-list");
+    const scannedCodes = new Set(); // to prevent duplicates (optional)
+
     function onScanSuccess(decodedText, decodedResult) {
-      console.log(`Scan result: ${decodedText}`, decodedResult);
-      alert(`Scanned: ${decodedText}`);
+      if (!scannedCodes.has(decodedText)) {
+        scannedCodes.add(decodedText);
+
+        const div = document.createElement("div");
+        div.className = "code-item";
+        div.textContent = decodedText;
+
+        resultsList.appendChild(div);
+      }
     }
 
     const config = {
       fps: 10,
       qrbox: 250,
       rememberLastUsedCamera: true,
-      // Here's the key part:
       facingMode: { exact: "environment" }
     };
 
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader", config
-    );
+    const html5QrcodeScanner = new Html5QrcodeScanner("reader", config);
     html5QrcodeScanner.render(onScanSuccess);
   </script>
 </body>
