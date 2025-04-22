@@ -11,13 +11,20 @@
 
   <script>
     function onScanSuccess(decodedText, decodedResult) {
-      // Handle the result
       console.log(`Scan result: ${decodedText}`, decodedResult);
       alert(`Scanned: ${decodedText}`);
     }
 
+    const config = {
+      fps: 10,
+      qrbox: 250,
+      rememberLastUsedCamera: true,
+      // Here's the key part:
+      facingMode: { exact: "environment" }
+    };
+
     const html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader", { fps: 10, qrbox: 250 }
+      "reader", config
     );
     html5QrcodeScanner.render(onScanSuccess);
   </script>
