@@ -4,29 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR Code Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <script src="https://raw.githubusercontent.com/mebjas/html5-qrcode/master/minified/html5-qrcode.min.js"></script>
   <style>
-    #reader { width: 100%; height: 400px; margin: auto; }
+    #qr-reader { width: 500px; height: 300px; margin: auto; }
+    #qr-reader-results { margin-top: 20px; }
   </style>
 </head>
 <body>
   <h2>Scan QR Code</h2>
-  <!-- The empty div where the QR scanner will render -->
-  <div id="reader" style="width: 500px;"></div>
+  <div id="qr-reader"></div>
+  <div id="qr-reader-results"></div>
 
   <script>
-    // Callback function to handle the scan result
-    function onScanSuccess(decodedText, decodedResult) {
-      // You can handle the scanned result here (e.g., display it, store it, etc.)
-      console.log(`Scan result: ${decodedText}`, decodedResult);
-      alert(`Scanned QR Code: ${decodedText}`);
+    function docReady(fn) {
+      if (document.readyState === "complete" || document.readyState === "interactive") {
+        setTimeout(fn, 1);
+      } else {
+        document.addEventListener("DOMContentLoaded", fn);
+      }
     }
 
-    // Initialize the scanner
-    var html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-    
-    // Render the scanner
-    html5QrcodeScanner.render(onScanSuccess);
+    docReady(function() {
+      var resultContainer = document.getElementById('qr-reader-results');
+      var lastResult, countResults = 0;
+
+      var html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader", { fps: 10, qrbox: 250 });
+
+      function onScanSuccess(decodedText, decodedResult) {
+        if (decodedText !== lastResult) {
+          ++countResults;
+          lastResult = decodedText;
+          console.log(`Scan result = ${decodedText}`, decodedResult);
+
+          resultContainer.innerHTML += `<div>[${countResults}] - ${decodedText}</div>`;
+        }
+      }
+
+      // Optional callback for error, can be ignored
+      function onScanError(qrCodeError) {
+        console.log("Scan error:", qrCodeError);
+      }
+
+      html5QrcodeScanner.render(onScanSuccess, onScanError);
+    });
   </script>
 </body>
 </html>
