@@ -2,75 +2,68 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Barcode to QR</title>
+  <title>Scan Barcodes</title>
   <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    #scanned-list { margin-top: 10px; }
-    .code-item { padding: 5px; background: #f0f0f0; margin: 2px 0; border-radius: 4px; }
+    #reader { width: 300px; margin: auto; }
+    .code-item { padding: 5px; border-bottom: 1px solid #ddd; }
   </style>
 </head>
 <body>
+  <h2>Scan Barcodes</h2>
+  <button id="start-scan" onclick="initScanner()">Start Scanning</button>
+  <div id="reader"></div>
+  <button onclick="stopScanner()">Stop Scanning</button>
+  <button onclick="generateQR()">Generate QR Code</button>
+  <div id="scanned-list"></div>
+  <div id="qrcode"></div>
 
-<h2>Scan Barcodes and Generate QR Code</h2>
+  <script>
+    const scannedBarcodes = new Set();
+    const html5QrCode = new Html5Qrcode("reader");
 
-<div id="reader" style="width: 300px;"></div>
-
-<button onclick="stopScanner()">Stop Scanning</button>
-<button onclick="generateQR()">Generate QR Code</button>
-
-<h3>Scanned Barcodes:</h3>
-<div id="scanned-list"></div>
-
-<h3>QR Code:</h3>
-<div id="qrcode"></div>
-
-<script>
-  const scannedBarcodes = new Set(); // Avoid duplicates
-
-  function onScanSuccess(decodedText, decodedResult) {
-    if (!scannedBarcodes.has(decodedText)) {
-      scannedBarcodes.add(decodedText);
-      const item = document.createElement("div");
-      item.className = "code-item";
-      item.textContent = decodedText;
-      document.getElementById("scanned-list").appendChild(item);
+    function onScanSuccess(decodedText) {
+      if (!scannedBarcodes.has(decodedText)) {
+        scannedBarcodes.add(decodedText);
+        const item = document.createElement("div");
+        item.className = "code-item";
+        item.textContent = decodedText;
+        document.getElementById("scanned-list").appendChild(item);
+      }
     }
-  }
 
-  const html5QrCode = new Html5Qrcode("reader");
-
-  Html5Qrcode.getCameras().then(devices => {
-    if (devices && devices.length) {
-      html5QrCode.start(
-        devices[0].id,
-        {
-          fps: 10,
-          qrbox: 250
-        },
-        onScanSuccess
-      );
+    async function initScanner() {
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length) {
+          document.getElementById("start-scan").disabled = true;  // Disable the button once scanning starts
+          await html5QrCode.start(devices[0].id, { fps: 10, qrbox: 250 }, onScanSuccess);
+        } else {
+          alert("No cameras found.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Camera access failed: " + err.message);
+      }
     }
-  });
 
-  function stopScanner() {
-    html5QrCode.stop().then(() => {
-      console.log("Scanner stopped.");
-    });
-  }
+    function stopScanner() {
+      html5QrCode.stop().then(() => {
+        document.getElementById("start-scan").disabled = false; // Re-enable the button after stopping
+        console.log("Scanner stopped.");
+      });
+    }
 
-  function generateQR() {
-    const dataArray = Array.from(scannedBarcodes);
-    const combined = dataArray.join('\r');
-    document.getElementById("qrcode").innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), {
-      text: combined,
-      width: 256,
-      height: 256
-    });
-  }
-</script>
-
+    function generateQR() {
+      const combined = Array.from(scannedBarcodes).join('\r');
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: combined,
+        width: 256,
+        height: 256
+      });
+    }
+  </script>
 </body>
 </html>
