@@ -20,8 +20,15 @@
   <div id="qrcode"></div>
 
   <script>
+    // Initialize the HTML5 QR code object
+    let html5QrCode;
+
+    // Ensure the library is fully loaded before using it
+    window.onload = function() {
+      html5QrCode = new Html5Qrcode("reader");
+    };
+
     const scannedBarcodes = new Set();
-    const html5QrCode = new Html5Qrcode("reader");
 
     function onScanSuccess(decodedText) {
       if (!scannedBarcodes.has(decodedText)) {
@@ -35,6 +42,11 @@
 
     async function initScanner() {
       try {
+        if (!html5QrCode) {
+          alert("QR Code scanner is not initialized.");
+          return;
+        }
+
         const devices = await Html5Qrcode.getCameras();
         if (devices && devices.length) {
           document.getElementById("start-scan").disabled = true;  // Disable the button once scanning starts
@@ -49,10 +61,12 @@
     }
 
     function stopScanner() {
-      html5QrCode.stop().then(() => {
-        document.getElementById("start-scan").disabled = false; // Re-enable the button after stopping
-        console.log("Scanner stopped.");
-      });
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          document.getElementById("start-scan").disabled = false; // Re-enable the button after stopping
+          console.log("Scanner stopped.");
+        });
+      }
     }
 
     function generateQR() {
