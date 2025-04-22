@@ -2,51 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Scanner</title>
-  <script src="https://raw.githubusercontent.com/mebjas/html5-qrcode/master/minified/html5-qrcode.min.js"></script>
-  <style>
-    #qr-reader { width: 500px; height: 300px; margin: auto; }
-    #qr-reader-results { margin-top: 20px; }
-  </style>
+  <title>Html5QrcodeScanner Example</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
-  <h2>Scan QR Code</h2>
-  <div id="qr-reader"></div>
-  <div id="qr-reader-results"></div>
+  <h1>Scan QR Code</h1>
+  <div style="width: 500px" id="reader"></div>
 
   <script>
-    function docReady(fn) {
-      if (document.readyState === "complete" || document.readyState === "interactive") {
-        setTimeout(fn, 1);
-      } else {
-        document.addEventListener("DOMContentLoaded", fn);
-      }
+    function onScanSuccess(decodedText, decodedResult) {
+      // Handle the result
+      console.log(`Scan result: ${decodedText}`, decodedResult);
+      alert(`Scanned: ${decodedText}`);
     }
 
-    docReady(function() {
-      var resultContainer = document.getElementById('qr-reader-results');
-      var lastResult, countResults = 0;
-
-      var html5QrcodeScanner = new Html5QrcodeScanner(
-        "qr-reader", { fps: 10, qrbox: 250 });
-
-      function onScanSuccess(decodedText, decodedResult) {
-        if (decodedText !== lastResult) {
-          ++countResults;
-          lastResult = decodedText;
-          console.log(`Scan result = ${decodedText}`, decodedResult);
-
-          resultContainer.innerHTML += `<div>[${countResults}] - ${decodedText}</div>`;
-        }
-      }
-
-      function onScanError(qrCodeError) {
-        console.log("Scan error:", qrCodeError);
-      }
-
-      html5QrcodeScanner.render(onScanSuccess, onScanError);
-    });
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader", { fps: 10, qrbox: 250 }
+    );
+    html5QrcodeScanner.render(onScanSuccess);
   </script>
 </body>
 </html>
