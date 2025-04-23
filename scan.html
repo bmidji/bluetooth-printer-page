@@ -1,80 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>QR Scanner & QR Generator</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    #scanned-results {
-      margin-top: 20px;
-    }
-    .code-item {
-      padding: 6px;
-      border-bottom: 1px solid #ccc;
-    }
-    #generate-btn {
-      margin-top: 10px;
-      padding: 8px 12px;
-      font-size: 16px;
-    }
-    #generated-qr {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Scan QR Code</h1>
-  <div style="width: 500px" id="reader"></div>
+<script>
+  const resultsList = document.getElementById("results-list");
+  const scannedCodes = new Set(); // unique scanned codes
+  const generateBtn = document.getElementById("generate-btn");
+  const generatedQrDiv = document.getElementById("generated-qr");
 
-  <div id="scanned-results">
-    <h2>Scanned Codes:</h2>
-    <div id="results-list"></div>
-    <button id="generate-btn">Create QR Code</button>
-    <div id="generated-qr"></div>
-  </div>
+  function onScanSuccess(decodedText, decodedResult) {
+    if (!scannedCodes.has(decodedText)) {
+      scannedCodes.add(decodedText);
 
-  <script>
-    const resultsList = document.getElementById("results-list");
-    const scannedCodes = new Set(); // unique scanned codes
-    const generateBtn = document.getElementById("generate-btn");
-    const generatedQrDiv = document.getElementById("generated-qr");
+      const div = document.createElement("div");
+      div.className = "code-item";
+      div.textContent = decodedText;
+      resultsList.appendChild(div);
+    }
+  }
 
-    function onScanSuccess(decodedText, decodedResult) {
-      if (!scannedCodes.has(decodedText)) {
-        scannedCodes.add(decodedText);
+  const config = {
+    fps: 10,
+    qrbox: 250,
+    rememberLastUsedCamera: true,
+    facingMode: { exact: "environment" }
+  };
 
-        const div = document.createElement("div");
-        div.className = "code-item";
-        div.textContent = decodedText;
-        resultsList.appendChild(div);
+  const html5QrcodeScanner = new Html5QrcodeScanner("reader", config);
+  html5QrcodeScanner.render(onScanSuccess);
+
+  generateBtn.addEventListener("click", () => {
+    const combined = Array.from(scannedCodes).join("\r");
+    QRCode.toDataURL(combined, { width: 300 }, (err, url) => {
+      if (err) {
+        console.error(err);
+        return;
       }
-    }
-
-    const config = {
-      fps: 10,
-      qrbox: 250,
-      rememberLastUsedCamera: true,
-      facingMode: { exact: "environment" }
-    };
-
-    const html5QrcodeScanner = new Html5QrcodeScanner("reader", config);
-    html5QrcodeScanner.render(onScanSuccess);
-
-    generateBtn.addEventListener("click", () => {
-      const combined = Array.from(scannedCodes).join("\r");
-      QRCode.toDataURL(combined, { width: 300 }, (err, url) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        generatedQrDiv.innerHTML = `<h2>Combined QR Code:</h2><img src="${url}" alt="QR Code">`;
-      });
+      generatedQrDiv.innerHTML = `<h2>Combined QR Code:</h2><img src="${url}" alt="QR Code">`;
     });
-  </script>
-</body>
-</html>
+  });
+
+  // 🚀 App Inventor integration
+  function sendQRDataToApp() {
+    const combined = Array.from(scannedCodes).join("\r");
+    if (window.AppInventor) {
+      window.AppInventor.setWebViewString(combined);
+    } else {
+      alert("AppInventor bridge not found.");
+    }
+  }
+</script>
